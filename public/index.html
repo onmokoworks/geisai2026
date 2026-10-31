@@ -105,27 +105,38 @@
     input.focus({ preventScroll: true });
    };
 
+   // 説明の iframe は一度だけ読み込み、あとは表示と一時停止を切り替える。
+   let attractReady = false, attractVisible = false, pauseTimer = 0;
    function showAttract() {
-    if (attract) return;
-    attract = document.createElement('iframe');
-    attract.className = 'attract';
-    attract.title = 'wadalab-motion の説明';
-    attract.tabIndex = -1;
-    attract.src = '/attract.html';
-    attract.addEventListener('load', () => {
-     requestAnimationFrame(() => attract?.classList.add('is-visible'));
-     focusInput();
-    }, { once: true });
-    stage.append(attract);
+    attractVisible = true;
+    if (!attract) {
+     attract = document.createElement('iframe');
+     attract.className = 'attract';
+     attract.title = 'wadalab-motion の説明';
+     attract.tabIndex = -1;
+     attract.src = '/attract.html';
+     attract.addEventListener('load', () => {
+      attractReady = true;
+      if (attractVisible) showAttract(); else attract.contentWindow.setPaused?.(true);
+      focusInput();
+     }, { once: true });
+     stage.append(attract);
+     return;
+    }
+    if (!attractReady) return;
+    clearTimeout(pauseTimer);
+    attract.contentWindow.setPaused?.(false);
+    requestAnimationFrame(() => attract.classList.add('is-visible'));
    }
 
    function hideAttract() {
     clearTimeout(attractTimer);
+    attractVisible = false;
     if (!attract) return;
-    const leaving = attract;
-    attract = null;
-    leaving.classList.remove('is-visible');
-    setTimeout(() => leaving.remove(), 800);
+    attract.classList.remove('is-visible');
+    clearTimeout(pauseTimer);
+    // フェードアウトが終わってから止める。
+    pauseTimer = setTimeout(() => { if (!attractVisible) attract.contentWindow.setPaused?.(true); }, 800);
    }
 
    function enterAttract() {

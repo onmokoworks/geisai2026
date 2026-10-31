@@ -18,6 +18,15 @@
     '自由にキーボードを操作して試打することができます。',
    ],
   };
+  // 親ページは iframe を作り直さず、見えない間はこれで描画ループを止める。
+  // 作り直すと文字データ（約 9MB）の解析をやり直して、画面全体が固まる。
+  let paused = false, queued = [];
+  const frame = window.requestAnimationFrame.bind(window);
+  window.requestAnimationFrame = callback => paused ? (queued.push(callback), 0) : frame(callback);
+  window.setPaused = next => {
+   paused = next;
+   if (!paused) { const callbacks = queued; queued = []; callbacks.forEach(frame); }
+  };
   // motion-4.js は night-one.json を読むので、その応答だけ差し替える。
   const load = window.fetch.bind(window);
   window.fetch = (input, init) => String(input).endsWith('/night-one.json')
