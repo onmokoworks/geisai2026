@@ -1,0 +1,9 @@
+{
+  "name": "geisai2026",
+  "private": true,
+  "type": "module",
+  "description": "多摩美芸祭2026 の wadalab-motion 展示（21:9 画面・ローカル実行）",
+  "scripts": {
+    "start": "node scripts/prepare.mjs && node server.mjs"
+  }
+}

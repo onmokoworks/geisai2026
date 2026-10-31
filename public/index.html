@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ja">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1">
+ <title>wadalab-motion — 芸祭2026</title>
+ <link rel="icon" href="data:,">
+ <style>
+  /* 21:9 の展示画面用。左 5/21 に説明、右 16/21 で試打と説明（Wadamotion-4 の動き）を切り替える。 */
+  @font-face { font-family: Wadalab; src: url('/workspace/wadalab-motion/font/wlmaru2004emoji.ttf') format('truetype'); font-display: swap; }
+  html, body { margin: 0; height: 100%; }
+  body { overflow: hidden; background: #fff; color: #111; cursor: none; }
+  .frame {
+   position: absolute; inset: 0; margin: auto;
+   width: min(100vw, calc(100vh * 21 / 9)); height: min(100vh, calc(100vw * 9 / 21));
+   display: grid; grid-template-columns: 5fr 16fr; container-type: size;
+  }
+  .panel {
+   display: flex; flex-direction: column; gap: 3.2cqh; min-width: 0;
+   padding: 6cqh 4.4cqh 5cqh; border-right: 1px solid #ddd;
+   font: 2.1cqh/1.75 Wadalab, sans-serif; letter-spacing: .03em;
+  }
+  h1 { margin: 0; font-size: 3.6cqh; line-height: 1.45; font-weight: normal; }
+  .hint { margin: 0; padding-left: 1.2cqh; border-left: 2px solid #111; }
+  .keys { margin: 1cqh 0 0; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 2.2cqh 2.4cqh; font-size: 2.3cqh; }
+  .keys dt { display: flex; align-items: center; gap: .8cqh; margin: 0; color: #777; }
+  .keys dd { margin: 0; }
+  kbd { display: inline-block; min-width: 5.2cqh; padding: .5cqh 1.1cqh; border: 1px solid #111; border-bottom-width: 3px; border-radius: .6cqh; color: #111; font: 1.8cqh/1.4 Wadalab, sans-serif; text-align: center; }
+  .frame[data-mode="attract"] .hint-typing,
+  .frame[data-mode="typing"] .hint-attract { display: none; }
+  .qr { margin: auto 0 0; display: flex; align-items: flex-end; gap: 2.4cqh; }
+  .qr-code { flex: none; width: 15cqh; }
+  .qr-code svg { display: block; width: 100%; height: auto; }
+  figcaption { color: #777; font-size: 1.35cqh; overflow-wrap: anywhere; }
+  .credit { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .3cqh 1.4cqh; color: #777; font-size: 1.25cqh; line-height: 1.6; }
+  .credit dt, .credit dd { margin: 0; }
+  .credit dd { overflow-wrap: anywhere; }
+  .stage { position: relative; overflow: hidden; }
+  .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .attract { pointer-events: none; opacity: 0; transition: opacity .8s; }
+  .attract.is-visible { opacity: 1; }
+  .idle-trash { position: absolute; z-index: 1; right: 3cqh; bottom: 3cqh; width: 7cqh; height: 7cqh; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity .4s; pointer-events: none; }
+  .idle-trash.is-visible { opacity: 1; }
+  .idle-trash .track { stroke: #e5e5e5; stroke-width: 2; }
+  .idle-trash .ring { stroke: #111; stroke-width: 2; transform: rotate(-90deg); transform-origin: center; }
+  .idle-trash .icon { stroke: #111; stroke-width: 1.6; }
+ </style>
+</head>
+<body>
+ <div class="frame" data-mode="attract">
+  <aside class="panel">
+   <h1>wadalab-motion</h1>
+   <p class="hint hint-attract">キーを押すと入力できます</p>
+   <p class="hint hint-typing">しばらく打たないと最初の画面に戻ります</p>
+   <!-- キー配置は展示用の HHKB と PC の設定に合わせて確認する。 -->
+   <dl class="keys">
+    <dt><kbd>control</kbd>+<kbd>space</kbd></dt><dd>かな／英数</dd>
+    <dt><kbd>space</kbd></dt><dd>変換</dd>
+    <dt><kbd>return</kbd></dt><dd>確定・改行</dd>
+    <dt><kbd>BS</kbd></dt><dd>1文字消す</dd>
+   </dl>
+   <figure class="qr">
+    <!-- https://onmk.work/workspace/wadalab-motion/ の QR（qrcode パッケージで生成）。 -->
+    <div class="qr-code"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path stroke="#111111" d="M0 0.5h7m3 0h2m4 0h1m1 0h6m2 0h7M0 1.5h1m5 0h1m2 0h4m2 0h2m1 0h1m2 0h1m2 0h1m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h1m2 0h2m1 0h1m1 0h1m2 0h1m1 0h3m2 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h1m2 0h1m2 0h1m1 0h2m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h4m2 0h3m3 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h1m1 0h2m5 0h3m2 0h3m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m1 0h1m3 0h1m1 0h1m2 0h5M0 8.5h1m1 0h5m2 0h1m1 0h1m1 0h2m1 0h2m1 0h2m1 0h3m1 0h5M0 9.5h3m2 0h1m4 0h4m2 0h2m1 0h2m2 0h2m1 0h2m1 0h2m1 0h1M0 10.5h1m2 0h1m1 0h3m1 0h9m2 0h1m1 0h1m2 0h1m2 0h1m1 0h2M4 11.5h2m3 0h1m3 0h1m2 0h5m2 0h2m3 0h3M0 12.5h4m1 0h2m1 0h3m3 0h1m1 0h1m2 0h7m2 0h2m1 0h2M7 13.5h2m2 0h2m2 0h1m2 0h1m5 0h1m1 0h1m3 0h3M0 14.5h1m1 0h3m1 0h1m1 0h1m3 0h7m1 0h1m1 0h1m2 0h2m1 0h4M0 15.5h1m1 0h1m1 0h2m1 0h1m3 0h2m2 0h1m5 0h3m1 0h2m1 0h3M1 16.5h1m1 0h4m1 0h6m1 0h1m1 0h1m4 0h4m1 0h2m3 0h1M1 17.5h2m4 0h5m2 0h1m4 0h5m2 0h2m1 0h2m1 0h1M1 18.5h1m2 0h5m1 0h2m2 0h3m1 0h1m1 0h2m4 0h3m1 0h2M0 19.5h1m1 0h4m3 0h1m1 0h6m2 0h4m2 0h1m1 0h5M1 20.5h7m3 0h1m3 0h1m2 0h1m2 0h1m1 0h3m1 0h3M0 21.5h4m1 0h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h5m1 0h1m3 0h1m1 0h1M0 22.5h1m2 0h6m3 0h2m4 0h2m4 0h3m4 0h1M0 23.5h1m1 0h1m1 0h2m3 0h1m2 0h1m3 0h1m1 0h4m1 0h1m1 0h2m1 0h1m1 0h3M0 24.5h1m1 0h5m1 0h1m2 0h1m5 0h1m1 0h2m1 0h7m3 0h1M8 25.5h1m1 0h2m1 0h1m2 0h5m3 0h1m3 0h1m1 0h1m1 0h1M0 26.5h7m2 0h3m1 0h5m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2M0 27.5h1m5 0h1m1 0h2m2 0h2m3 0h4m2 0h2m3 0h3M0 28.5h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h2m2 0h4m1 0h6m1 0h1M0 29.5h1m1 0h3m1 0h1m1 0h1m1 0h1m4 0h1m2 0h1m6 0h1m2 0h2m2 0h1M0 30.5h1m1 0h3m1 0h1m1 0h4m2 0h3m1 0h1m1 0h1m2 0h1m2 0h2m1 0h2M0 31.5h1m5 0h1m3 0h2m1 0h3m5 0h2m2 0h2m1 0h3M0 32.5h7m1 0h5m2 0h1m1 0h1m5 0h5m3 0h1"/></svg></div>
+    <figcaption>onmk.work/workspace/wadalab-motion</figcaption>
+   </figure>
+   <dl class="credit">
+    <dt>骨格データ</dt><dd>CLWFK（東京大学和田研究室・電子書体オープンラボラトリー）</dd>
+    <dt>英数字</dt><dd>和田研細丸ゴシック2004絵文字（希土類元素レアアース）</dd>
+   </dl>
+  </aside>
+  <main class="stage">
+   <iframe class="typing" src="/workspace/wadalab-motion/index.html" title="文字を入力"></iframe>
+   <svg class="idle-trash" viewBox="0 0 48 48" aria-hidden="true">
+    <circle class="track" cx="24" cy="24" r="22" />
+    <circle class="ring" cx="24" cy="24" r="22" />
+    <path class="icon" d="M16.5 17H31.5M21 17V14.5H27V17M18.5 17L19.8 33.5H28.2L29.5 17M22.5 21V29.5M25.5 21V29.5" />
+   </svg>
+  </main>
+ </div>
+
+ <script>
+  (() => {
+   const params = new URLSearchParams(location.search);
+   // 最後の入力からこの秒数で説明の画面に戻す。?idle=10 で調整できる。
+   // 右下のゴミ箱は graceSeconds 後に出て、残りの時間で周りの円が一周する。
+   const idleSeconds = Number(params.get('idle')) || 30, graceSeconds = Math.min(3, idleSeconds / 3);
+   const frame = document.querySelector('.frame');
+   const stage = frame.querySelector('.stage'), typing = frame.querySelector('.typing');
+   const trash = frame.querySelector('.idle-trash'), ring = trash.querySelector('.ring'), ringLength = ring.getTotalLength();
+   ring.style.strokeDasharray = ringLength;
+   let mode = 'attract', lastInput = 0, attract = null, input = null, attractTimer = 0;
+
+   const setMode = next => { mode = next; frame.dataset.mode = next; };
+   const focusInput = () => {
+    if (!input || input.ownerDocument.querySelector('dialog[open]')) return;
+    typing.contentWindow.focus();
+    input.focus({ preventScroll: true });
+   };
+
+   function showAttract() {
+    if (attract) return;
+    attract = document.createElement('iframe');
+    attract.className = 'attract';
+    attract.title = 'wadalab-motion の説明';
+    attract.tabIndex = -1;
+    attract.src = '/attract.html';
+    attract.addEventListener('load', () => {
+     requestAnimationFrame(() => attract?.classList.add('is-visible'));
+     focusInput();
+    }, { once: true });
+    stage.append(attract);
+   }
+
+   function hideAttract() {
+    clearTimeout(attractTimer);
+    if (!attract) return;
+    const leaving = attract;
+    attract = null;
+    leaving.classList.remove('is-visible');
+    setTimeout(() => leaving.remove(), 800);
+   }
+
+   function enterAttract() {
+    setMode('attract');
+    // 打たれた文字を消すアニメーションを見せてから切り替える。
+    if (input.value) {
+     clearText();
+     attractTimer = setTimeout(showAttract, 1800);
+    } else showAttract();
+   }
+
+   // 卑猥語と暴言は server.mjs 経由で Clef-flash に判定させ、打たれてから 3 秒以内に全文を消す。
+   let checkTimer = 0, checking = '';
+   function clearText() {
+    input.value = '';
+    input.dispatchEvent(new InputEvent('input', { inputType: 'deleteContentBackward' }));
+   }
+   function scheduleCheck() {
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(async () => {
+     const text = input.value;
+     if (!text.trim() || text === checking) return;
+     checking = text;
+     try {
+      const response = await fetch('/api/moderate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+      if (!response.ok) return;
+      const { flagged } = await response.json();
+      if (flagged && input.value.startsWith(text)) clearText();
+     } catch { /* 回線が切れても展示は続ける。 */ }
+     finally { if (checking === text) checking = ''; }
+    }, 400);
+   }
+
+   function activity() {
+    lastInput = performance.now();
+    if (mode === 'attract') { setMode('typing'); hideAttract(); }
+   }
+
+   typing.addEventListener('load', () => {
+    const doc = typing.contentDocument;
+    const style = doc.createElement('style');
+    style.textContent = '#paste,#info{display:none!important}body{cursor:none}';
+    doc.head.append(style);
+    input = doc.getElementById('input');
+    for (const type of ['keydown', 'compositionstart', 'input']) input.addEventListener(type, event => { if (event.isTrusted) activity(); });
+    input.addEventListener('input', event => { if (event.isTrusted && !event.isComposing) scheduleCheck(); });
+    input.addEventListener('compositionend', scheduleCheck);
+    focusInput();
+    showAttract();
+   });
+
+   // 展示中にフォーカスが外れても、次のキー入力を取りこぼさないようにする。
+   document.addEventListener('pointerdown', () => setTimeout(focusInput));
+   addEventListener('focus', focusInput);
+   setInterval(() => {
+    if (input && typing.contentDocument.activeElement !== input) focusInput();
+   }, 1000);
+
+   function tick(now) {
+    const idle = (now - lastInput) / 1000;
+    const progress = mode === 'typing' ? Math.max(0, (idle - graceSeconds) / (idleSeconds - graceSeconds)) : 0;
+    trash.classList.toggle('is-visible', progress > 0);
+    if (progress > 0) ring.style.strokeDashoffset = ringLength * (1 - Math.min(1, progress));
+    // 円が一周したら、打たれた文字がほどけて説明の画面に変わる。
+    if (progress >= 1) enterAttract();
+    requestAnimationFrame(tick);
+   }
+   requestAnimationFrame(tick);
+  })();
+ </script>
+</body>
+</html>
