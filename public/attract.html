@@ -29,11 +29,28 @@
    paused = next;
    if (!paused) { const callbacks = queued; queued = []; callbacks.forEach(frame); }
   };
+  // 試打の iframe が読み込み済みの字形データ（約 9MB）を借りる。
+  // 二重に持つとメモリが倍になり、ガベージコレクションで一瞬止まるのが増える。
+  async function sharedGlyphs() {
+   const typing = parent.document.querySelector('.typing')?.contentWindow;
+   const version = typing?.document.querySelector('script[src*="/app.js"]')?.src.split('?')[1];
+   if (!version) return null;
+   const { getSourceEngine } = await typing.eval(`import('/workspace/wadalab-motion/source-engine.js?${version}')`);
+   for (let i = 0; i < 100 && !getSourceEngine(); i++) await new Promise(resolve => setTimeout(resolve, 100));
+   const engine = getSourceEngine();
+   return engine && [...engine.glyphs].map(([text, skeleton]) => [text, skeleton, engine.definitions.get(text)]);
+  }
   // motion-4.js は night-one.json を読むので、その応答だけ差し替える。
   const load = window.fetch.bind(window);
-  window.fetch = (input, init) => String(input).endsWith('/night-one.json')
-   ? Promise.resolve(new Response(JSON.stringify(story), { headers: { 'Content-Type': 'application/json' } }))
-   : load(input, init);
+  window.fetch = async (input, init) => {
+   const url = String(input);
+   if (url.endsWith('/night-one.json')) return new Response(JSON.stringify(story), { headers: { 'Content-Type': 'application/json' } });
+   if (url.endsWith('/source-glyphs.json')) {
+    const glyphs = await sharedGlyphs().catch(() => null);
+    if (glyphs) return { ok: true, status: 200, json: async () => glyphs };
+   }
+   return load(input, init);
+  };
  </script>
  <script type="module" src="/workspace/wadalab-motion/motion-4.js"></script>
 </body>
