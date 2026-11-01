@@ -6,7 +6,7 @@ import {join, resolve, sep} from 'node:path';
 import {execFileSync} from 'node:child_process';
 
 const root = new URL('../', import.meta.url);
-const experiments = {'wadalab-motion': {repository: 'onmokoworks/wadalab-motion', commit: 'f8e49d61f832eb5bcaa79192d7fba40287632159'}};
+const experiments = {'wadalab-motion': {repository: 'onmokoworks/wadalab-motion', commit: '19bad828089c1bf5246647b67f9f0e3583fb0d5a'}};
 const current = await readFile(new URL('vendor/wadalab-motion/build-source.json', root), 'utf8').then(JSON.parse).catch(() => null);
 if (current?.commit === experiments['wadalab-motion'].commit) {
   console.log(`wadalab-motion @ ${current.commit}（取得済み）`);
