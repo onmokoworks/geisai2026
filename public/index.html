@@ -81,6 +81,8 @@
    // 最後の入力からこの秒数で説明の画面に戻す。?idle=10 で調整できる。
    // 右下のゴミ箱は graceSeconds 後に出て、残りの時間で周りの円が一周する。
    const idleSeconds = Number(params.get('idle')) || 30, graceSeconds = Math.min(3, idleSeconds / 3);
+   // 開いてからこの分数が過ぎたら、次に説明の画面へ戻ったときに読み込み直す。?reload=60 で調整できる。
+   const reloadMinutes = Number(params.get('reload')) || 20;
    const frame = document.querySelector('.frame');
    const stage = frame.querySelector('.stage'), typing = frame.querySelector('.typing');
    const trash = frame.querySelector('.idle-trash'), ring = trash.querySelector('.ring'), ringLength = ring.getTotalLength();
@@ -191,6 +193,8 @@
     if (progress > 0) ring.style.strokeDashoffset = ringLength * (1 - Math.min(1, progress));
     // 円が一周したら、打たれた文字がほどけて説明の画面に変わる。
     if (progress >= 1) enterAttract();
+    // 長時間の放置で固まるので、説明の画面を出している間に定期的に読み込み直す。
+    if (mode === 'attract' && attractVisible && now > reloadMinutes * 60000) location.reload();
     requestAnimationFrame(tick);
    }
    requestAnimationFrame(tick);
