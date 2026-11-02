@@ -9,13 +9,13 @@
 </head>
 <body>
  <!-- 待機画面。Wadamotion-4 の動きで、夢十夜の代わりに説明文を流す。 -->
- <canvas role="img" aria-label="これは和田研フォントの骨格データを使用したフォントモーションプロジェクトの試作です。自由にキーボードを操作して試打することができます。"></canvas>
+ <canvas role="img" aria-label="これは和田研フォントの骨格データを使用したフォントモーションプロジェクトの試作です。自由にキーボードを操作して試し打ちすることができます。"></canvas>
  <script>
   const story = {
    title: 'wadalab-motion',
    phrases: [
     'これは和田研フォントの骨格データを使用したフォントモーションプロジェクトの試作です。',
-    '自由にキーボードを操作して試打することができます。',
+    '自由にキーボードを操作して試し打ちすることができます。',
    ],
   };
   // 離れて見る展示なので等倍で描く。Retina だとキャンバスと文字の画像が 4 倍になり、長時間で重くなる。
@@ -29,7 +29,7 @@
    paused = next;
    if (!paused) { const callbacks = queued; queued = []; callbacks.forEach(frame); }
   };
-  // 試打の iframe が読み込み済みの字形データ（約 9MB）を借りる。
+  // 試し打ちの iframe が読み込み済みの字形データ（約 9MB）を借りる。
   // 二重に持つとメモリが倍になり、ガベージコレクションで一瞬止まるのが増える。
   async function sharedGlyphs() {
    const typing = parent.document.querySelector('.typing')?.contentWindow;

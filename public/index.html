@@ -6,7 +6,7 @@
  <title>wadalab-motion — 芸祭2026</title>
  <link rel="icon" href="data:,">
  <style>
-  /* 21:9 の展示画面用。左 5/21 に説明、右 16/21 で試打と説明（Wadamotion-4 の動き）を切り替える。 */
+  /* 21:9 の展示画面用。左 5/21 に説明、右 16/21 で試し打ちと説明（Wadamotion-4 の動き）を切り替える。 */
   @font-face { font-family: Wadalab; src: url('/workspace/wadalab-motion/font/wlmaru2004emoji.ttf') format('truetype'); font-display: swap; }
   html, body { margin: 0; height: 100%; }
   body { overflow: hidden; background: #fff; color: #111; cursor: none; }
@@ -24,6 +24,14 @@
   .hint { margin: 0; padding-left: 1.2cqh; border-left: 2px solid #111; }
   .frame[data-mode="attract"] .hint-typing,
   .frame[data-mode="typing"] .hint-attract { display: none; }
+  .keyboard { display: block; width: 100%; height: auto; overflow: visible; }
+  .keyboard .case { fill: none; stroke: #111; stroke-width: 1; }
+  .keyboard .keys rect { fill: none; stroke: #111; stroke-width: .7; }
+  .keyboard .hot rect { fill: #111; }
+  .keyboard .lead { fill: none; stroke: #111; stroke-width: .7; }
+  .keyboard text { font-family: Wadalab, sans-serif; fill: #111; }
+  .keyboard .key-name { font-size: 10px; fill: #777; }
+  .keyboard .action { font-size: 16px; }
   .qrs { margin: auto 0 0; display: flex; gap: 3cqh; }
   .qr { margin: 0; display: flex; flex-direction: column; gap: 1.2cqh; }
   .qr-code { width: 15cqh; }
@@ -34,6 +42,8 @@
   .credit dd { overflow-wrap: anywhere; }
   .stage { position: relative; overflow: hidden; }
   .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  /* 試し打ちの文字が画面の端に触れて切れて見えないように、左右に余白をとる。 */
+  .stage .typing { left: 3cqh; width: calc(100% - 7cqh); }
   .attract { pointer-events: none; opacity: 0; transition: opacity .8s; }
   .attract.is-visible { opacity: 1; }
   .idle-trash { position: absolute; z-index: 1; right: 3cqh; bottom: 3cqh; width: 7cqh; height: 7cqh; fill: none; stroke-linecap: round; stroke-linejoin: round; opacity: 0; transition: opacity .4s; pointer-events: none; }
@@ -49,11 +59,20 @@
    <h1>wadalab-motion</h1>
    <p class="hint hint-attract">キーを押すと入力できます</p>
    <p class="hint hint-typing">しばらく打たないと最初の画面に戻ります</p>
+   <!-- HHKB（PD-KB02 と同じ配列）を上から見た図。Tab と Return を塗る。 -->
+   <svg class="keyboard" viewBox="-22 -10 344 170" role="img" aria-label="Tab キーで変換、Return キーで確定">
+     <rect class="case" x="-8" y="-8" width="316" height="116" rx="9"/>
+     <g class="keys"><rect x="1.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="21.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="41.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="61.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="81.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="101.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="121.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="141.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="161.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="181.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="201.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="221.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="241.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="261.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="281.6" y="1.6" width="16.8" height="16.8" rx="2.5"/><rect x="31.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="51.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="71.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="91.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="111.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="131.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="151.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="171.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="191.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="211.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="231.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="251.6" y="21.6" width="16.8" height="16.8" rx="2.5"/><rect x="271.6" y="21.6" width="26.8" height="16.8" rx="2.5"/><rect x="1.6" y="41.6" width="31.8" height="16.8" rx="2.5"/><rect x="36.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="56.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="76.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="96.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="116.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="136.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="156.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="176.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="196.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="216.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="236.6" y="41.6" width="16.8" height="16.8" rx="2.5"/><rect x="1.6" y="61.6" width="41.8" height="16.8" rx="2.5"/><rect x="46.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="66.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="86.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="106.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="126.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="146.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="166.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="186.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="206.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="226.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="246.6" y="61.6" width="31.8" height="16.8" rx="2.5"/><rect x="281.6" y="61.6" width="16.8" height="16.8" rx="2.5"/><rect x="31.6" y="81.6" width="16.8" height="16.8" rx="2.5"/><rect x="51.6" y="81.6" width="26.8" height="16.8" rx="2.5"/><rect x="81.6" y="81.6" width="116.8" height="16.8" rx="2.5"/><rect x="201.6" y="81.6" width="26.8" height="16.8" rx="2.5"/><rect x="231.6" y="81.6" width="16.8" height="16.8" rx="2.5"/></g>
+     <g class="hot"><rect x="1.6" y="21.6" width="26.8" height="16.8" rx="2.5"/><rect x="256.6" y="41.6" width="41.8" height="16.8" rx="2.5"/></g>
+     <path class="lead" d="M1.6 30H-16V122M298.4 50H316V122"/>
+     <text class="key-name" x="-16" y="138">Tab</text><text class="action" x="-16" y="158">変換</text>
+     <text class="key-name" x="316" y="138" text-anchor="end">Return</text><text class="action" x="316" y="158" text-anchor="end">確定</text>
+    </svg>
    <!-- QR は qrcode パッケージで生成。 -->
    <div class="qrs">
     <figure class="qr">
      <div class="qr-code"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path stroke="#111111" d="M0 0.5h7m3 0h2m4 0h1m1 0h6m2 0h7M0 1.5h1m5 0h1m2 0h4m2 0h2m1 0h1m2 0h1m2 0h1m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h1m2 0h2m1 0h1m1 0h1m2 0h1m1 0h3m2 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h2m2 0h1m2 0h1m2 0h1m2 0h1m1 0h2m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m1 0h3m1 0h4m2 0h3m3 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h1m1 0h2m5 0h3m2 0h3m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m1 0h1m3 0h1m1 0h1m2 0h5M0 8.5h1m1 0h5m2 0h1m1 0h1m1 0h2m1 0h2m1 0h2m1 0h3m1 0h5M0 9.5h3m2 0h1m4 0h4m2 0h2m1 0h2m2 0h2m1 0h2m1 0h2m1 0h1M0 10.5h1m2 0h1m1 0h3m1 0h9m2 0h1m1 0h1m2 0h1m2 0h1m1 0h2M4 11.5h2m3 0h1m3 0h1m2 0h5m2 0h2m3 0h3M0 12.5h4m1 0h2m1 0h3m3 0h1m1 0h1m2 0h7m2 0h2m1 0h2M7 13.5h2m2 0h2m2 0h1m2 0h1m5 0h1m1 0h1m3 0h3M0 14.5h1m1 0h3m1 0h1m1 0h1m3 0h7m1 0h1m1 0h1m2 0h2m1 0h4M0 15.5h1m1 0h1m1 0h2m1 0h1m3 0h2m2 0h1m5 0h3m1 0h2m1 0h3M1 16.5h1m1 0h4m1 0h6m1 0h1m1 0h1m4 0h4m1 0h2m3 0h1M1 17.5h2m4 0h5m2 0h1m4 0h5m2 0h2m1 0h2m1 0h1M1 18.5h1m2 0h5m1 0h2m2 0h3m1 0h1m1 0h2m4 0h3m1 0h2M0 19.5h1m1 0h4m3 0h1m1 0h6m2 0h4m2 0h1m1 0h5M1 20.5h7m3 0h1m3 0h1m2 0h1m2 0h1m1 0h3m1 0h3M0 21.5h4m1 0h1m2 0h1m1 0h1m2 0h1m1 0h2m3 0h5m1 0h1m3 0h1m1 0h1M0 22.5h1m2 0h6m3 0h2m4 0h2m4 0h3m4 0h1M0 23.5h1m1 0h1m1 0h2m3 0h1m2 0h1m3 0h1m1 0h4m1 0h1m1 0h2m1 0h1m1 0h3M0 24.5h1m1 0h5m1 0h1m2 0h1m5 0h1m1 0h2m1 0h7m3 0h1M8 25.5h1m1 0h2m1 0h1m2 0h5m3 0h1m3 0h1m1 0h1m1 0h1M0 26.5h7m2 0h3m1 0h5m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2M0 27.5h1m5 0h1m1 0h2m2 0h2m3 0h4m2 0h2m3 0h3M0 28.5h1m1 0h3m1 0h1m1 0h2m2 0h2m1 0h2m2 0h4m1 0h6m1 0h1M0 29.5h1m1 0h3m1 0h1m1 0h1m1 0h1m4 0h1m2 0h1m6 0h1m2 0h2m2 0h1M0 30.5h1m1 0h3m1 0h1m1 0h4m2 0h3m1 0h1m1 0h1m2 0h1m2 0h2m1 0h2M0 31.5h1m5 0h1m3 0h2m1 0h3m5 0h2m2 0h2m1 0h3M0 32.5h7m1 0h5m2 0h1m1 0h1m5 0h5m3 0h1"/></svg></div>
-     <figcaption>試打サイト</figcaption>
+     <figcaption>試し打ちサイト</figcaption>
     </figure>
     <figure class="qr">
      <div class="qr-code"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" shape-rendering="crispEdges"><path stroke="#111111" d="M0 0.5h7m4 0h2m1 0h1m1 0h1m1 0h3m2 0h1m2 0h7M0 1.5h1m5 0h1m2 0h2m4 0h2m1 0h1m3 0h1m3 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h1m1 0h2m2 0h1m4 0h3m4 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m9 0h2m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m5 0h4m2 0h2m1 0h1m2 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h3m2 0h1m5 0h1m6 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h1m5 0h1m1 0h1m2 0h3m1 0h1M0 8.5h1m1 0h5m3 0h2m1 0h1m3 0h1m1 0h1m3 0h1m2 0h5M0 9.5h2m2 0h1m3 0h1m1 0h1m1 0h2m2 0h5m2 0h1m2 0h2m1 0h2m1 0h1M0 10.5h1m1 0h3m1 0h2m1 0h3m1 0h3m1 0h1m2 0h1m1 0h1m1 0h3m1 0h1m1 0h2M0 11.5h5m2 0h2m2 0h3m3 0h4m3 0h2m2 0h4M4 12.5h1m1 0h2m1 0h1m1 0h2m1 0h3m2 0h7m1 0h3M3 13.5h2m2 0h1m2 0h2m1 0h1m1 0h1m1 0h2m4 0h1m2 0h2m1 0h4M0 14.5h1m1 0h1m2 0h3m1 0h1m1 0h1m3 0h3m2 0h1m1 0h1m2 0h4m1 0h2M0 15.5h5m4 0h1m1 0h2m1 0h2m5 0h1m2 0h4m1 0h2M2 16.5h1m1 0h1m1 0h1m1 0h1m2 0h1m2 0h4m4 0h4m1 0h2m3 0h1M0 17.5h2m1 0h1m1 0h1m1 0h4m1 0h2m2 0h1m1 0h4m1 0h1m2 0h2m1 0h2m1 0h1M0 18.5h1m2 0h2m1 0h2m1 0h5m1 0h2m1 0h1m1 0h2m2 0h5m1 0h2M0 19.5h2m2 0h2m1 0h1m1 0h1m2 0h3m1 0h1m2 0h4m2 0h1m1 0h6M1 20.5h6m1 0h1m1 0h2m1 0h1m4 0h2m1 0h1m2 0h2m1 0h3m1 0h1M0 21.5h1m2 0h1m1 0h1m1 0h1m5 0h1m1 0h3m2 0h4m2 0h1m3 0h1m1 0h1M0 22.5h1m1 0h2m1 0h4m1 0h1m6 0h3m4 0h2m3 0h3M0 23.5h1m6 0h1m3 0h3m2 0h1m2 0h4m2 0h3m1 0h3M0 24.5h1m2 0h2m1 0h2m1 0h2m2 0h2m2 0h1m1 0h1m2 0h1m1 0h5m2 0h2M8 25.5h2m2 0h2m2 0h4m3 0h2m3 0h1m1 0h3M0 26.5h7m2 0h1m2 0h1m1 0h4m2 0h1m1 0h3m1 0h1m1 0h1m1 0h2M0 27.5h1m5 0h1m1 0h1m1 0h1m1 0h2m2 0h3m1 0h1m2 0h2m3 0h5M0 28.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h2m2 0h4m1 0h6m1 0h2M0 29.5h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h1m1 0h1m1 0h2m4 0h3m2 0h2m2 0h1M0 30.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m1 0h3m2 0h1m1 0h1m3 0h2m2 0h1M0 31.5h1m5 0h1m2 0h1m3 0h1m1 0h1m5 0h3m1 0h2m1 0h3M0 32.5h7m1 0h2m2 0h1m2 0h3m4 0h6m3 0h1"/></svg></div>

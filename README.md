@@ -2,7 +2,7 @@
 
 芸祭2026 で展示する [wadalab-motion](https://github.com/onmokoworks/wadalab-motion) の展示用ページです。21:9 の画面に出して使います。
 
-左の 5/21 に操作説明と QR、右の 16/21 に試打の画面を出します。放置すると説明文が Wadamotion-4 の動きで流れ、キーを押すと試打に戻ります。打った文字は Cloudflare Workers AI の Clef-flash で判定し、卑猥語や暴言だったら消します。
+左の 5/21 に操作説明と QR、右の 16/21 に試し打ちの画面を出します。放置すると説明文が Wadamotion-4 の動きで流れ、キーを押すと試し打ちに戻ります。打った文字は Cloudflare Workers AI の Clef-flash で判定し、卑猥語や暴言だったら消します。
 
 ## 公開版（Cloudflare Pages）
 
