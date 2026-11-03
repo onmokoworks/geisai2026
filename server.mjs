@@ -18,11 +18,22 @@ if (!accountId || !apiKey) console.warn('CLOUDFLARE_ACCOUNT_ID か CLOUDFLARE_AU
 
 const types = {'.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ttf': 'font/ttf', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8'};
 
-async function moderate(text) {
+// 会場の回線は途切れやすいので、失敗したら 1 回だけやり直す。
+async function moderate(text, retry = true) {
+  try {
+    return await request(text);
+  } catch (error) {
+    if (!retry) throw error;
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return moderate(text, false);
+  }
+}
+
+async function request(text) {
   const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`, {
     method: 'POST',
     headers: {Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json'},
-    signal: AbortSignal.timeout(4000),
+    signal: AbortSignal.timeout(6000),
     body: JSON.stringify(moderationRequest(text)),
   });
   const {success, result, errors} = await response.json();
@@ -38,10 +49,10 @@ createServer(async (request, response) => {
       for await (const chunk of request) { body += chunk; if (body.length > 20000) throw new Error('too long'); }
       const text = String(JSON.parse(body).text ?? '').slice(0, maxLength);
       const judgment = accountId && apiKey && text.trim() ? await moderate(text) : {flagged: false};
-      if (judgment.flagged) console.log('消去:', text, JSON.stringify(judgment.scores));
+      if (judgment.flagged) console.log(new Date().toLocaleTimeString('ja-JP'), '消去:', text, JSON.stringify(judgment.scores));
       response.writeHead(200, {'Content-Type': 'application/json'}).end(JSON.stringify(judgment));
     } catch (error) {
-      console.warn('判定に失敗:', error.message);
+      console.warn(new Date().toLocaleTimeString('ja-JP'), '判定に失敗:', error.message);
       response.writeHead(502, {'Content-Type': 'application/json'}).end(JSON.stringify({error: error.message}));
     }
     return;
